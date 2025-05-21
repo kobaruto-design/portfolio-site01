@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
     const body = document.body;
+    const navLinks = document.querySelectorAll('nav ul li a');
     
     if (menuToggle) {
         menuToggle.addEventListener('click', function() {
@@ -18,6 +19,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // ナビゲーションリンクのクリックイベント
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                nav.classList.remove('active');
+                menuToggle.classList.remove('active');
+                body.style.overflow = '';
+            }
+        });
+    });
     
     // ウィンドウサイズが変更された時の処理
     window.addEventListener('resize', function() {
@@ -31,17 +43,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // スクロール時のヘッダースタイル変更
     const header = document.querySelector('header');
     let scrollPosition = 0;
+    let lastScrollPosition = 0;
     
     function updateHeaderStyle() {
         scrollPosition = window.scrollY;
         
+        // スクロール方向の検出
+        const isScrollingDown = scrollPosition > lastScrollPosition;
+        const isScrollingUp = scrollPosition < lastScrollPosition;
+        
         if (scrollPosition > 50) {
             header.style.padding = window.innerWidth < 768 ? '8px 0' : '10px 0';
             header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            
+            // モバイルでのスクロール方向に応じたヘッダー表示制御
+            if (window.innerWidth <= 768) {
+                if (isScrollingDown && scrollPosition > 100) {
+                    header.style.transform = 'translateY(-100%)';
+                } else if (isScrollingUp) {
+                    header.style.transform = 'translateY(0)';
+                }
+            }
         } else {
             header.style.padding = window.innerWidth < 768 ? '15px 0' : '20px 0';
             header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            header.style.transform = 'translateY(0)';
         }
+        
+        lastScrollPosition = scrollPosition;
     }
     
     window.addEventListener('scroll', updateHeaderStyle);
@@ -139,4 +168,11 @@ document.addEventListener('DOMContentLoaded', function() {
         element.style.transition = `opacity ${animationDuration} ease, transform ${animationDuration} ease`;
         animateObserver.observe(element);
     });
+
+    // タッチデバイスでのダブルタップズーム防止
+    document.addEventListener('touchend', function(e) {
+        if (e.touches.length < 2) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 }); 
